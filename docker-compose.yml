@@ -1,0 +1,75 @@
+version: '3'
+services:
+  mongo1:
+    hostname: mongo
+    container_name: mongo
+    image: mongo
+    ports:
+      - "27017:27017"
+      - "28018:28017"
+    restart: always
+    entrypoint: [ "/usr/bin/mongod", "--bind_ip_all", "--replSet", "rs0" ]
+  mongo-express:
+    image: mongo-express
+    restart: always
+    ports:
+      - 8081:8081
+  mongo-config:
+    image: mongo
+    depends_on:
+      - mongo1
+    volumes:
+      - ./scripts:/scripts
+    environment:
+      - MONGO=mongo1
+      - USER=machine
+      - PWD=abc123456
+      - RS=rs0
+    entrypoint: ['/scripts/setup.sh']
+  es1:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.0.0-alpha2
+    container_name: es1
+    environment:
+      - node.name=es1
+      - cluster.initial_master_nodes=es1,es2
+      - discovery.zen.ping.unicast.hosts=es2
+      - cluster.name=docker-cluster
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - esdata01:/usr/share/elasticsearch/data
+    ports:
+      - 9200:9200
+    networks:
+      - esnet
+  es2:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.0.0-alpha2
+    container_name: es2
+    environment:
+      - node.name=es2
+      - discovery.zen.ping.unicast.hosts=es1
+      - cluster.initial_master_nodes=es1,es2
+      - cluster.name=docker-cluster
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - esdata02:/usr/share/elasticsearch/data
+    networks:
+      - esnet
+
+volumes:
+  esdata01:
+    driver: local
+  esdata02:
+    driver: local
+
+networks:
+  esnet:

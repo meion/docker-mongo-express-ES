@@ -1,0 +1,4 @@
+mongo@latest
+elasticsearch:latest
+yeasy/mongo-connector:latest
+mongo-express@latest
