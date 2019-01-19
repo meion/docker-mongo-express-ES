@@ -15,17 +15,6 @@ echo "Started.."
 echo "setup.sh; time now: $(date +"%T")"
 
 mongo --host ${mongodb}:${port} <<EOF
-    use admin
-    db.createUser(
-        {
-            user: ${USER},
-            pwd: #{pwd},
-            roles: [ { role: "userAdminAnyDatabase", db: "admin" } ]
-        }
-    )
-EOF
-
-mongo --host ${mongodb}:${port} <<EOF
    var cfg = {
         "_id": "${RS}",
         "members": [
