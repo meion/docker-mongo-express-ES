@@ -40,9 +40,8 @@ services:
       - "8081:8081"
 
   monstache:
-    build: monstache
-    # volumes:
-    #   - ./monstache/config.toml:/usr/share/monstache/config.toml
-    environment: 
+    image: rwynn/monstache
+    restart: always
+    environment:
       MONSTACHE_MONGO_URL: "mongodb://mongo:27017"
       MONSTACHE_ES_URLS: "http://elasticsearch:9200"
